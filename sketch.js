@@ -21,16 +21,16 @@ var brokenGlass,
   tyre,
   candyWrapper,
   wornShoe;
-  var ground;
+var ground;
 
-var bg, bg2, bg3;
+var bg, bg2, bg3, bg4, bgInfo;
 var biodegradableWaste, nonBiodegradableWaste;
 var gameState;
 var edges;
 var bioGrp, nonBioGrp;
 
 var biodegradableBinImg, nonBiodegradableImg;
-
+var score, sc2;
 function preload() {
   glassImg = loadImage("images/glass.png");
   boardImg = loadImage("images/cardBoard.png");
@@ -49,8 +49,8 @@ function preload() {
   bg = loadImage("images/bg.png");
   bg1 = loadImage("images/bg1.png");
   bg2 = loadImage("images/bio'sEndPage.png");
-
-  groundImg=loadImage("images/ground.png");
+  bgInfo = loadImage("images/vScreen.png");
+  groundImg = loadImage("images/ground.png");
 }
 function setup() {
   createCanvas(1000, 500);
@@ -63,12 +63,12 @@ function setup() {
    4 is end from score becomming 0 after reaching 10 once
   */
   gameState = 0;
-  biodegradableWaste = createSprite(200, 300, 130,10);
-  biodegradableWaste.visible=false;
+  biodegradableWaste = createSprite(200, 300, 130, 10);
+  biodegradableWaste.visible = false;
   nonBiodegradableWaste = createSprite(800, 300, 130, 10);
-  nonBiodegradableWaste.visible=false;
+  nonBiodegradableWaste.visible = false;
   edges = createEdgeSprites();
-
+  //the objects that are in the game
   brokenGlass = null;
   cardBoard = null;
   newsPaper = null;
@@ -79,127 +79,109 @@ function setup() {
   tyre = null;
   candyWrapper = null;
   wornShoe = null;
-
+  //the groups in which the objects formed would be stored
   nonBioGrp = createGroup();
   bioGrp = createGroup();
 
-  ground=createSprite(500,485,1000,30);
-  ground.visible=false;
+  ground = createSprite(500,485, 1000, 30);
+  ground.visible = false;
+
+  score=0;
+  sc2=null;
 }
 
 function draw() {
   if (gameState === 0) {
     background(bg);
-    biodegradableWaste.x=130;
-    nonBiodegradableWaste.x=870;
+    biodegradableWaste.x = 130;
+    nonBiodegradableWaste.x = 870;
+    sc2=0;
+    score=0;
+    if (keyDown("v")) {
+      background(bgInfo);
+    }
     if (keyDown("s")) {
       gameState = 1;
     }
   } else if (gameState === 1) {
     background(bg1);
     spawn();
-
-    if (keyDown("a")) {
-      biodegradableWaste.x = biodegradableWaste.x - 9;
-    } else if (keyDown("d")) {
-      biodegradableWaste.x = biodegradableWaste.x + 9;
-    }
-
-    if (
-      keyDown(LEFT_ARROW) &&
-      nonBiodegradableWaste.x > 195 &&
-      nonBiodegradableWaste.isTouching(biodegradableWaste) === false
-    ) {
-      nonBiodegradableWaste.x = nonBiodegradableWaste.x - 9;
-    } else if (keyDown(RIGHT_ARROW)) {
-      nonBiodegradableWaste.x = nonBiodegradableWaste.x + 9;
-    }
+     
+    text("YOUR SCORE: "+score,500,50);
+    
     collides(biodegradableWaste, nonBiodegradableWaste);
     drawSprites();
-    push()
+    push();
     imageMode(CENTER);
     image(
       biodegradableBinImg,
       biodegradableWaste.x,
-      biodegradableWaste.y+100,
+      biodegradableWaste.y + 100,
       170,
       200
     );
     image(
       nonBiodegradableImg,
       nonBiodegradableWaste.x,
-      nonBiodegradableWaste.y+100,
+      nonBiodegradableWaste.y + 100,
       170,
       200
     );
-    pop()
-      image(groundImg,ground.x-500,ground.y-19,1000,190);
+    pop();
+    image(groundImg, ground.x - 500, ground.y - 19, 1000, 190);
+      movement(biodegradableWaste,'a','d');
+      movement(nonBiodegradableWaste,LEFT_ARROW,RIGHT_ARROW);
+    
+      //trash and bins is touching codes
+  if (bioGrp) {
+    for (var i = 0; i < bioGrp.length; i++) {
+      if (bioGrp.get(i).isTouching(biodegradableWaste)) {
+        bioGrp.get(i).destroy();
+      }
 
-    //trash and bins is touching codes
-    if(bioGrp)
-    {
-      for(var i=0;i<bioGrp.length;i++)
-                      {
-                        if(bioGrp.get(i).isTouching(biodegradableWaste))
-                        {
-                            bioGrp.get(i).destroy();
-                        }
-    
-     
-     if(bioGrp.get(i).isTouching(ground))
-    {
-     bioGrp.get(i).destroy();
-      
+      if (bioGrp.get(i).isTouching(ground)) {
+        bioGrp.get(i).destroy();
+      }
     }
-  }
-    if(bioGrp.isTouching(nonBiodegradableWaste))
-    {
-      gameState=2;
+    if (bioGrp.isTouching(nonBiodegradableWaste)) {
+     
       bioGrp.destroyEach();
       nonBioGrp.destroyEach();
-    } 
-    }
-    if (nonBioGrp)
-    {
-    for(var i=0;i<nonBioGrp.length;i++)
-                      {
-                        if(nonBioGrp.get(i).isTouching(nonBiodegradableWaste))
-                        {
-                            nonBioGrp.get(i).destroy();
-                        }
-    
-     
-     if(nonBioGrp.get(i).isTouching(ground))
-    {
-     nonBioGrp.get(i).destroy();
-      
+      gameState = 2;
     }
   }
-    if(nonBioGrp.isTouching(biodegradableWaste))
-    {
-      gameState=3;
+ if (nonBioGrp) {
+    for (var i = 0; i < nonBioGrp.length; i++) {
+      if (nonBioGrp.get(i).isTouching(nonBiodegradableWaste)) {
+        nonBioGrp.get(i).destroy();
+      }
+
+      if (nonBioGrp.get(i).isTouching(ground)) {
+        nonBioGrp.get(i).destroy();
+      }
+    }
+    if (nonBioGrp.isTouching(biodegradableWaste)) {
       bioGrp.destroyEach();
       nonBioGrp.destroyEach();
+      gameState = 3;
+     
     }
   }
+
   } else if (gameState === 2) {
     background(bg2);
-    if(keyWentDown('r'))
-    {
-      gameState=0;
+    if (keyWentDown("r")) {
+      gameState = 0;
     }
   } else if (gameState === 3) {
     //background()
-    if(keyWentDown('r'))
-    {
-      gameState=0;
+    if (keyWentDown("r")) {
+      gameState = 0;
     }
-  }else if(gameState===4)
-  {
+  } else if (gameState === 4) {
     //background()
-    if(keyWentDown('r'))
-    {
-      gameState=0;
+    if (keyWentDown("r")) {
+      gameState = 0;
     }
   }
 }
@@ -207,6 +189,7 @@ function spawn() {
   var type = 0;
   bioGrp.setLifetimeEach(700);
   nonBioGrp.setLifetimeEach(700);
+
   if (frameCount % 60 === 0) {
     type = Math.round(random(1, 10));
     console.log(type);
@@ -216,7 +199,7 @@ function spawn() {
         cardBoard = createSprite(random(100, 800), 0, 15, 15);
         cardBoard.addImage(boardImg);
         cardBoard.scale = 0.2;
-        cardBoard.setVelocity(0,4);
+        cardBoard.setVelocity(0,3);
         bioGrp.add(cardBoard);
         break;
       //wet Waste/biodegradable
@@ -224,7 +207,7 @@ function spawn() {
         newsPaper = createSprite(random(100, 800), 0, 15, 15);
         newsPaper.addImage(newsImg);
         newsPaper.scale = 0.2;
-        newsPaper.setVelocity(0,4);
+        newsPaper.setVelocity(0,3);
         bioGrp.add(newsPaper);
         break;
 
@@ -233,7 +216,7 @@ function spawn() {
         vegitablePeel = createSprite(random(100, 800), 0, 15, 15);
         vegitablePeel.addImage(peelImg);
         vegitablePeel.scale = 0.2;
-        vegitablePeel.setVelocity(0,4);
+        vegitablePeel.setVelocity(0,3);
         bioGrp.add(vegitablePeel);
         break;
 
@@ -242,7 +225,7 @@ function spawn() {
         soiledFood = createSprite((100, 800), 0, 15, 15);
         soiledFood.addImage(soiledImg);
         soiledFood.scale = 0.2;
-        soiledFood.setVelocity(0,4);
+        soiledFood.setVelocity(0,3);
         bioGrp.add(soiledFood);
         break;
       //wet Waste/biodegradable
@@ -250,7 +233,7 @@ function spawn() {
         tissueBox = createSprite(random(100, 800), 0, 15, 15);
         tissueBox.addImage(tissueImg);
         tissueBox.scale = 0.2;
-        tissueBox.setVelocity(0,4);
+        tissueBox.setVelocity(0,3);
         bioGrp.add(tissueBox);
         break;
       //dry Waste
@@ -258,7 +241,7 @@ function spawn() {
         tyre = createSprite(random(200, 900), 0, 15, 15);
         tyre.addImage(tyreImg);
         tyre.scale = 0.2;
-        tyre.setVelocity(0,4);
+        tyre.setVelocity(0,3);
         nonBioGrp.add(tyre);
         break;
       //dry Waste
@@ -266,7 +249,7 @@ function spawn() {
         wornShoe = createSprite(random(200, 900), 0, 15, 15);
         wornShoe.addImage(shoeImg);
         wornShoe.scale = 0.2;
-        wornShoe.setVelocity(0,4);
+        wornShoe.setVelocity(0,3);
         nonBioGrp.add(wornShoe);
         break;
       //dry Waste
@@ -274,7 +257,7 @@ function spawn() {
         candyWrapper = createSprite(random(200, 900), 0, 15, 15);
         candyWrapper.addImage(wrapperImg);
         candyWrapper.scale = 0.2;
-        candyWrapper.setVelocity(0,4);
+        candyWrapper.setVelocity(0,3);
         nonBioGrp.add(candyWrapper);
         break;
       //dry Waste Bin
@@ -282,7 +265,7 @@ function spawn() {
         brokenGlass = createSprite(random(200, 900), 0, 15, 15);
         brokenGlass.addImage(glassImg);
         brokenGlass.scale = 0.2;
-        brokenGlass.setVelocity(0,4);
+        brokenGlass.setVelocity(0,3);
         nonBioGrp.add(brokenGlass);
         break;
       //dry Waste
@@ -290,7 +273,7 @@ function spawn() {
         plasticBag = createSprite(random(200, 900), 0, 15, 15);
         plasticBag.addImage(plasticImg);
         plasticBag.scale = 0.2;
-        plasticBag.setVelocity(0,4);
+        plasticBag.setVelocity(0,3);
         nonBioGrp.add(plasticBag);
         break;
     }
@@ -307,4 +290,14 @@ function collides(bodyA, bodyB) {
 
   bodyA.collide(bodyB);
   bodyB.collide(bodyA);
+}
+function movement(body,keyA,keyB)
+{
+  if (keyDown(keyA)) {
+   body.x = body.x - 9;
+  } else if (keyDown(keyB)) {
+    body.x = body.x + 9;
+  }
+ 
+  
 }
