@@ -9,6 +9,10 @@ The player has to control 2 movements of two objects together ,the Dry Waste Bin
 The 'SCORING' system works such that for every waste product you dispose/segregate correctly you recive a point 
 Whereas when you drop a wet waste on the ground you recieve a negative point and when you drop any dry waste you get negative five
 
-The game is an endless run you would loose when you put the  item in the wrong bin
+The game is an endless run you would loose when you put the  item in the wrong bin or reach a score of 0 again after reaching score of 10.
+
+to see the debugging mode you may use 'tchr' 
+it would show the collider of all the sprites and would show the frameRate and frameCount to you
+To quit debug state  press 'q'
 
 Hope you would enjoy
