@@ -24,7 +24,7 @@ var brokenGlass,
 var ground;
 
 var bg, bg2, bg3, bg4, bgInfo;
-var biodegradableWaste, nonBiodegradableWaste;
+var biodegradableBin, nonBiodegradableBin;
 var gameState;
 var edges;
 var bioGrp, nonBioGrp;
@@ -49,6 +49,7 @@ function preload() {
   bg = loadImage("images/bg.png");
   bg1 = loadImage("images/bg1.png");
   bg2 = loadImage("images/bio'sEndPage.png");
+  bg3 = loadImage("images/nonBgEnd.png");
   bgInfo = loadImage("images/vScreen.png");
   groundImg = loadImage("images/ground.png");
 }
@@ -63,10 +64,10 @@ function setup() {
    4 is end from score becomming 0 after reaching 10 once
   */
   gameState = 0;
-  biodegradableWaste = createSprite(200, 300, 130, 10);
-  biodegradableWaste.visible = false;
-  nonBiodegradableWaste = createSprite(800, 300, 130, 10);
-  nonBiodegradableWaste.visible = false;
+  biodegradableBin = createSprite(200, 300, 130, 10);
+  biodegradableBin.visible = false;
+  nonBiodegradableBin = createSprite(800, 300, 130, 10);
+  nonBiodegradableBin.visible = false;
   edges = createEdgeSprites();
   //the objects that are in the game
   brokenGlass = null;
@@ -83,20 +84,20 @@ function setup() {
   nonBioGrp = createGroup();
   bioGrp = createGroup();
 
-  ground = createSprite(500,485, 1000, 30);
+  ground = createSprite(500, 485, 1000, 30);
   ground.visible = false;
 
-  score=0;
-  sc2=null;
+  score = 0;
+  sc2 = -1;
 }
 
 function draw() {
   if (gameState === 0) {
     background(bg);
-    biodegradableWaste.x = 130;
-    nonBiodegradableWaste.x = 870;
-    sc2=0;
-    score=0;
+    biodegradableBin.x = 130;
+    nonBiodegradableBin.x = 870;
+    sc2 = -1;
+    score = 0;
     if (keyDown("v")) {
       background(bgInfo);
     }
@@ -105,81 +106,91 @@ function draw() {
     }
   } else if (gameState === 1) {
     background(bg1);
+    text("YOUR SCORE: " + score, 500, 50);
+    //to spawn the objects
+    //to see the code go to line 192
     spawn();
-     
-    text("YOUR SCORE: "+score,500,50);
-    
-    collides(biodegradableWaste, nonBiodegradableWaste);
+    //the movement of the bins is controlled by this movement()
+    //to know more go to line 300
+    movement(biodegradableBin, "a", "d");
+    movement(nonBiodegradableBin, LEFT_ARROW, RIGHT_ARROW);
+    //used to check colision
+    //to know more go to line 288
+    collides(biodegradableBin, nonBiodegradableBin);
+    //to draw sprites in the play state
     drawSprites();
-    push();
-    imageMode(CENTER);
-    image(
-      biodegradableBinImg,
-      biodegradableWaste.x,
-      biodegradableWaste.y + 100,
-      170,
-      200
-    );
-    image(
-      nonBiodegradableImg,
-      nonBiodegradableWaste.x,
-      nonBiodegradableWaste.y + 100,
-      170,
-      200
-    );
-    pop();
-    image(groundImg, ground.x - 500, ground.y - 19, 1000, 190);
-      movement(biodegradableWaste,'a','d');
-      movement(nonBiodegradableWaste,LEFT_ARROW,RIGHT_ARROW);
-    
-      //trash and bins is touching codes
-  if (bioGrp) {
-    for (var i = 0; i < bioGrp.length; i++) {
-      if (bioGrp.get(i).isTouching(biodegradableWaste)) {
-        bioGrp.get(i).destroy();
-      }
 
-      if (bioGrp.get(i).isTouching(ground)) {
-        bioGrp.get(i).destroy();
+    allImages();
+    //scores();
+
+    //biodegradable group's conditions of points scoring and change of state
+    if (bioGrp) {
+      for (var i = 0; i < bioGrp.length; i++) {
+        if (bioGrp.get(i).isTouching(biodegradableBin)) {
+          bioGrp.get(i).destroy();
+          score = score + 1;
+          sc2 = sc2 + 1;
+          continue;
+        }
+
+        if (bioGrp.get(i).isTouching(ground)) {
+          bioGrp.get(i).destroy();
+          score = score - 1;
+          sc2 = sc2 + 1;
+          continue;
+        }
+        if (bioGrp.get(i).isTouching(nonBiodegradableBin)) {
+          bioGrp.destroyEach();
+          nonBioGrp.destroyEach();
+          gameState = 2;
+          break;
+        }
       }
     }
-    if (bioGrp.isTouching(nonBiodegradableWaste)) {
-     
-      bioGrp.destroyEach();
-      nonBioGrp.destroyEach();
-      gameState = 2;
+    //Non-biodegradable group's conditions of points scoring and change of state
+    if (nonBioGrp) {
+      for (var i = 0; i < nonBioGrp.length; i++) {
+        if (nonBioGrp.get(i).isTouching(nonBiodegradableBin)) {
+          nonBioGrp.get(i).destroy();
+          score = score + 1;
+          sc2 = sc2 + 1;
+          continue;
+        }
+        console.log(nonBioGrp);
+        console.log("nonBioGrp");
+        console.log(nonBioGrp.get(i));
+        if (nonBioGrp.get(i).isTouching(ground)) {
+          nonBioGrp.get(i).destroy();
+          score = score - 5;
+          sc2 = sc2 - 5;
+          continue;
+        }
+        if (nonBioGrp.get(i).isTouching(biodegradableBin)) {
+          bioGrp.destroyEach();
+          nonBioGrp.destroyEach();
+          gameState = 3;
+          break;
+        }
+      }
     }
   }
- if (nonBioGrp) {
-    for (var i = 0; i < nonBioGrp.length; i++) {
-      if (nonBioGrp.get(i).isTouching(nonBiodegradableWaste)) {
-        nonBioGrp.get(i).destroy();
-      }
-
-      if (nonBioGrp.get(i).isTouching(ground)) {
-        nonBioGrp.get(i).destroy();
-      }
-    }
-    if (nonBioGrp.isTouching(biodegradableWaste)) {
-      bioGrp.destroyEach();
-      nonBioGrp.destroyEach();
-      gameState = 3;
-     
-    }
-  }
-
-  } else if (gameState === 2) {
+  //gameState changed to end due to putting of biodegradable waste in non-biodegradable waste
+  else if (gameState === 2) {
     background(bg2);
     if (keyWentDown("r")) {
       gameState = 0;
     }
-  } else if (gameState === 3) {
-    //background()
+  }
+  //gameState changed to end due to putting of non-biodegradable waste in biodegradable waste
+  else if (gameState === 3) {
+    background(bg3);
     if (keyWentDown("r")) {
       gameState = 0;
     }
-  } else if (gameState === 4) {
-    //background()
+  }
+  //end due to raching score 0 after reaching 10 once
+  else if (gameState === 4) {
+    //background(bg4)
     if (keyWentDown("r")) {
       gameState = 0;
     }
@@ -189,7 +200,7 @@ function spawn() {
   var type = 0;
   bioGrp.setLifetimeEach(700);
   nonBioGrp.setLifetimeEach(700);
-
+  //to make the conditions work after every 60 frames
   if (frameCount % 60 === 0) {
     type = Math.round(random(1, 10));
     console.log(type);
@@ -199,7 +210,7 @@ function spawn() {
         cardBoard = createSprite(random(100, 800), 0, 15, 15);
         cardBoard.addImage(boardImg);
         cardBoard.scale = 0.2;
-        cardBoard.setVelocity(0,3);
+        cardBoard.setVelocity(0, 3);
         bioGrp.add(cardBoard);
         break;
       //wet Waste/biodegradable
@@ -207,7 +218,7 @@ function spawn() {
         newsPaper = createSprite(random(100, 800), 0, 15, 15);
         newsPaper.addImage(newsImg);
         newsPaper.scale = 0.2;
-        newsPaper.setVelocity(0,3);
+        newsPaper.setVelocity(0, 3);
         bioGrp.add(newsPaper);
         break;
 
@@ -216,7 +227,7 @@ function spawn() {
         vegitablePeel = createSprite(random(100, 800), 0, 15, 15);
         vegitablePeel.addImage(peelImg);
         vegitablePeel.scale = 0.2;
-        vegitablePeel.setVelocity(0,3);
+        vegitablePeel.setVelocity(0, 3);
         bioGrp.add(vegitablePeel);
         break;
 
@@ -225,7 +236,7 @@ function spawn() {
         soiledFood = createSprite((100, 800), 0, 15, 15);
         soiledFood.addImage(soiledImg);
         soiledFood.scale = 0.2;
-        soiledFood.setVelocity(0,3);
+        soiledFood.setVelocity(0, 3);
         bioGrp.add(soiledFood);
         break;
       //wet Waste/biodegradable
@@ -233,7 +244,7 @@ function spawn() {
         tissueBox = createSprite(random(100, 800), 0, 15, 15);
         tissueBox.addImage(tissueImg);
         tissueBox.scale = 0.2;
-        tissueBox.setVelocity(0,3);
+        tissueBox.setVelocity(0, 3);
         bioGrp.add(tissueBox);
         break;
       //dry Waste
@@ -241,7 +252,7 @@ function spawn() {
         tyre = createSprite(random(200, 900), 0, 15, 15);
         tyre.addImage(tyreImg);
         tyre.scale = 0.2;
-        tyre.setVelocity(0,3);
+        tyre.setVelocity(0, 3);
         nonBioGrp.add(tyre);
         break;
       //dry Waste
@@ -249,7 +260,7 @@ function spawn() {
         wornShoe = createSprite(random(200, 900), 0, 15, 15);
         wornShoe.addImage(shoeImg);
         wornShoe.scale = 0.2;
-        wornShoe.setVelocity(0,3);
+        wornShoe.setVelocity(0, 3);
         nonBioGrp.add(wornShoe);
         break;
       //dry Waste
@@ -257,7 +268,7 @@ function spawn() {
         candyWrapper = createSprite(random(200, 900), 0, 15, 15);
         candyWrapper.addImage(wrapperImg);
         candyWrapper.scale = 0.2;
-        candyWrapper.setVelocity(0,3);
+        candyWrapper.setVelocity(0, 3);
         nonBioGrp.add(candyWrapper);
         break;
       //dry Waste Bin
@@ -265,7 +276,7 @@ function spawn() {
         brokenGlass = createSprite(random(200, 900), 0, 15, 15);
         brokenGlass.addImage(glassImg);
         brokenGlass.scale = 0.2;
-        brokenGlass.setVelocity(0,3);
+        brokenGlass.setVelocity(0, 3);
         nonBioGrp.add(brokenGlass);
         break;
       //dry Waste
@@ -273,13 +284,15 @@ function spawn() {
         plasticBag = createSprite(random(200, 900), 0, 15, 15);
         plasticBag.addImage(plasticImg);
         plasticBag.scale = 0.2;
-        plasticBag.setVelocity(0,3);
+        plasticBag.setVelocity(0, 3);
         nonBioGrp.add(plasticBag);
         break;
     }
   }
 }
 function collides(bodyA, bodyB) {
+  //lines which command the sprites to collide with the following
+  //0,1 here stand for the side edges
   bodyA.collide(edges[1]);
 
   bodyA.collide(edges[0]);
@@ -291,13 +304,39 @@ function collides(bodyA, bodyB) {
   bodyA.collide(bodyB);
   bodyB.collide(bodyA);
 }
-function movement(body,keyA,keyB)
-{
+function movement(body, keyA, keyB) {
+  //body is the bins,keyA is for left movement and key2 is for right movement over here
   if (keyDown(keyA)) {
-   body.x = body.x - 9;
+    body.x = body.x - 9;
   } else if (keyDown(keyB)) {
     body.x = body.x + 9;
   }
- 
-  
+}
+function allImages() {
+  push();
+  imageMode(CENTER);
+  image(
+    biodegradableBinImg,
+    biodegradableBin.x,
+    biodegradableBin.y + 100,
+    170,
+    200
+  );
+  image(
+    nonBiodegradableImg,
+    nonBiodegradableBin.x,
+    nonBiodegradableBin.y + 100,
+    170,
+    200
+  );
+  pop();
+  image(groundImg, ground.x - 500, ground.y - 19, 1000, 190);
+}
+function scores() {
+  if (score >= 10) {
+    sc2 = score;
+  }
+  if (sc2 <= 0) {
+    gameState = 4;
+  }
 }
