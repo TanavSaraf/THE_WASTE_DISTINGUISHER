@@ -30,7 +30,7 @@ var edges;
 var bioGrp, nonBioGrp;
 
 var biodegradableBinImg, nonBiodegradableImg;
-var score, sc2;
+var score,scoreState;
 function preload() {
   glassImg = loadImage("images/glass.png");
   boardImg = loadImage("images/cardBoard.png");
@@ -88,7 +88,7 @@ function setup() {
   ground.visible = false;
 
   score = 0;
-  sc2 = -1;
+  scoreState=0;
 }
 
 function draw() {
@@ -96,8 +96,9 @@ function draw() {
     background(bg);
     biodegradableBin.x = 130;
     nonBiodegradableBin.x = 870;
-    sc2 = -1;
+    
     score = 0;
+    scoreState=0;
     if (keyDown("v")) {
       background(bgInfo);
     }
@@ -106,7 +107,11 @@ function draw() {
     }
   } else if (gameState === 1) {
     background(bg1);
+    push()
+    textSize(20);
+    fill('black')
     text("YOUR SCORE: " + score, 500, 50);
+    pop();
     //to spawn the objects
     //to see the code go to line 192
     spawn();
@@ -121,7 +126,7 @@ function draw() {
     drawSprites();
 
     allImages();
-    //scores();
+   
 
     //biodegradable group's conditions of points scoring and change of state
     if (bioGrp) {
@@ -129,20 +134,23 @@ function draw() {
         if (bioGrp.get(i).isTouching(biodegradableBin)) {
           bioGrp.get(i).destroy();
           score = score + 1;
-          sc2 = sc2 + 1;
+          
+          scores();
           continue;
         }
 
         if (bioGrp.get(i).isTouching(ground)) {
           bioGrp.get(i).destroy();
           score = score - 1;
-          sc2 = sc2 + 1;
+          
+          scores();
           continue;
         }
         if (bioGrp.get(i).isTouching(nonBiodegradableBin)) {
           bioGrp.destroyEach();
           nonBioGrp.destroyEach();
           gameState = 2;
+          
           break;
         }
       }
@@ -153,16 +161,16 @@ function draw() {
         if (nonBioGrp.get(i).isTouching(nonBiodegradableBin)) {
           nonBioGrp.get(i).destroy();
           score = score + 1;
-          sc2 = sc2 + 1;
+          
+          scores();
           continue;
         }
-        console.log(nonBioGrp);
-        console.log("nonBioGrp");
-        console.log(nonBioGrp.get(i));
+       
         if (nonBioGrp.get(i).isTouching(ground)) {
           nonBioGrp.get(i).destroy();
           score = score - 5;
-          sc2 = sc2 - 5;
+          
+          scores();
           continue;
         }
         if (nonBioGrp.get(i).isTouching(biodegradableBin)) {
@@ -190,7 +198,8 @@ function draw() {
   }
   //end due to raching score 0 after reaching 10 once
   else if (gameState === 4) {
-    //background(bg4)
+
+    background("red")
     if (keyWentDown("r")) {
       gameState = 0;
     }
@@ -203,7 +212,7 @@ function spawn() {
   //to make the conditions work after every 60 frames
   if (frameCount % 60 === 0) {
     type = Math.round(random(1, 10));
-    console.log(type);
+   
     switch (type) {
       //wet Waste/biodegradeble
       case 1:
@@ -333,10 +342,18 @@ function allImages() {
   image(groundImg, ground.x - 500, ground.y - 19, 1000, 190);
 }
 function scores() {
-  if (score >= 10) {
-    sc2 = score;
+if(score>10)
+{
+  scoreState=1;
+}
+if(scoreState===1)
+{
+  if(score=0)
+  {
+    bioGrp.destroyEach();
+    nonBioGrp.destroyEach();
+    gameState=4;
   }
-  if (sc2 <= 0) {
-    gameState = 4;
-  }
+}
+
 }
