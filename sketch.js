@@ -1,5 +1,7 @@
 //to understand a basic working system for the game you may visit the README.md provided with the folder.
-
+/*
+keys in use w,a,s,d,r,p,t,leftArrow,rightArrow
+*/
 var glassImg,
   boardImg,
   newsImg,
@@ -23,6 +25,8 @@ var brokenGlass,
   wornShoe;
 var ground;
 
+var gameMode, frameGap;
+var debugMode;
 var bg, bg2, bg3, bg4, bgInfo;
 var biodegradableBin, nonBiodegradableBin;
 var gameState;
@@ -30,7 +34,7 @@ var edges;
 var bioGrp, nonBioGrp;
 
 var biodegradableBinImg, nonBiodegradableImg;
-var score,scoreState;
+var score, scoreState;
 function preload() {
   glassImg = loadImage("images/glass.png");
   boardImg = loadImage("images/cardBoard.png");
@@ -64,6 +68,17 @@ function setup() {
    4 is end from score becomming 0 after reaching 10 once
   */
   gameState = 0;
+
+  //gameMode is to set the difficulty
+
+  gameMode = "easy";
+  /*
+  debug mode is to 
+  see the frameRate,frameCount,current gameMode
+  0=off
+  1=on 
+  */
+  debugMode = 0;
   biodegradableBin = createSprite(200, 300, 130, 10);
   biodegradableBin.visible = false;
   nonBiodegradableBin = createSprite(800, 300, 130, 10);
@@ -88,7 +103,7 @@ function setup() {
   ground.visible = false;
 
   score = 0;
-  scoreState=0;
+  scoreState = 0;
 }
 
 function draw() {
@@ -96,9 +111,35 @@ function draw() {
     background(bg);
     biodegradableBin.x = 130;
     nonBiodegradableBin.x = 870;
-    
+    push();
+    textSize(20);
+    fill("black");
+    text("gameMode:" + gameMode, 420, 70);
+    pop();
     score = 0;
-    scoreState=0;
+    scoreState = 0;
+    debugMode = 0;
+
+    if (gameMode === "easy") {
+      frameGap = 60;
+
+      if (keyWentDown("t")) {
+        gameMode = "medium";
+      }
+    } else if (gameMode === "medium") {
+      frameGap = 50;
+
+      if (keyWentDown("t")) {
+        gameMode = "hard";
+      }
+    } else if (gameMode === "hard") {
+      frameGap = 40;
+
+      if (keyWentDown("t")) {
+        gameMode = "easy";
+      }
+    }
+
     if (keyDown("v")) {
       background(bgInfo);
     }
@@ -107,9 +148,9 @@ function draw() {
     }
   } else if (gameState === 1) {
     background(bg1);
-    push()
+    push();
     textSize(20);
-    fill('black')
+    fill("black");
     text("YOUR SCORE: " + score, 500, 50);
     pop();
     //to spawn the objects
@@ -119,14 +160,20 @@ function draw() {
     //to know more go to line 300
     movement(biodegradableBin, "a", "d");
     movement(nonBiodegradableBin, LEFT_ARROW, RIGHT_ARROW);
+
     //used to check colision
     //to know more go to line 288
     collides(biodegradableBin, nonBiodegradableBin);
+
+    //to turn on debug mode on or off
+    //to know more go to line 409
+    debugg();
     //to draw sprites in the play state
     drawSprites();
 
     allImages();
-   
+    // the function for it is to increase scores in the game
+    cheat();
 
     //biodegradable group's conditions of points scoring and change of state
     if (bioGrp) {
@@ -134,7 +181,7 @@ function draw() {
         if (bioGrp.get(i).isTouching(biodegradableBin)) {
           bioGrp.get(i).destroy();
           score = score + 1;
-          
+
           scores();
           continue;
         }
@@ -142,7 +189,7 @@ function draw() {
         if (bioGrp.get(i).isTouching(ground)) {
           bioGrp.get(i).destroy();
           score = score - 1;
-          
+
           scores();
           continue;
         }
@@ -150,7 +197,7 @@ function draw() {
           bioGrp.destroyEach();
           nonBioGrp.destroyEach();
           gameState = 2;
-          
+
           break;
         }
       }
@@ -161,15 +208,15 @@ function draw() {
         if (nonBioGrp.get(i).isTouching(nonBiodegradableBin)) {
           nonBioGrp.get(i).destroy();
           score = score + 1;
-          
+
           scores();
           continue;
         }
-       
+
         if (nonBioGrp.get(i).isTouching(ground)) {
           nonBioGrp.get(i).destroy();
           score = score - 5;
-          
+
           scores();
           continue;
         }
@@ -186,6 +233,7 @@ function draw() {
   else if (gameState === 2) {
     background(bg2);
     if (keyWentDown("r")) {
+      gameMode = "easy";
       gameState = 0;
     }
   }
@@ -193,14 +241,15 @@ function draw() {
   else if (gameState === 3) {
     background(bg3);
     if (keyWentDown("r")) {
+      gameMode = "easy";
       gameState = 0;
     }
   }
   //end due to raching score 0 after reaching 10 once
   else if (gameState === 4) {
-
-    background("red")
+    background("red");
     if (keyWentDown("r")) {
+      gameMode = "easy";
       gameState = 0;
     }
   }
@@ -210,9 +259,9 @@ function spawn() {
   bioGrp.setLifetimeEach(700);
   nonBioGrp.setLifetimeEach(700);
   //to make the conditions work after every 60 frames
-  if (frameCount % 60 === 0) {
+  if (frameCount % frameGap === 0) {
     type = Math.round(random(1, 10));
-   
+
     switch (type) {
       //wet Waste/biodegradeble
       case 1:
@@ -342,18 +391,36 @@ function allImages() {
   image(groundImg, ground.x - 500, ground.y - 19, 1000, 190);
 }
 function scores() {
-if(score>10)
-{
-  scoreState=1;
-}
-if(scoreState===1)
-{
-  if(score=0)
-  {
-    bioGrp.destroyEach();
-    nonBioGrp.destroyEach();
-    gameState=4;
+  if (score > 10) {
+    scoreState = 1;
+  }
+  if (scoreState === 1) {
+    if (score <= 0) {
+      bioGrp.destroyEach();
+      nonBioGrp.destroyEach();
+      gameState = 4;
+    }
   }
 }
-
+function debugg() {
+  if (debugMode === 0) {
+    console.log(debugMode);
+    if (keyWentDown("p")) {
+      debugMode = 1;
+    }
+  } else if (debugMode === 1) {
+    console.log(debugMode);
+    text("THE CURRENT FRAMECOUNT IS : " + frameCount, 700, 100);
+    text("THE CURRENT FRMERATE IS : " + Math.round(frameRate()), 700, 130);
+    text("THE GAME MODE IS : " + gameMode, 700, 160);
+    if (keyWentDown("p")) {
+      debugMode = 0;
+    }
+  }
+}
+function cheat() {
+  if (keyWentDown("w")) {
+    
+    score +=10;
+  }
 }
