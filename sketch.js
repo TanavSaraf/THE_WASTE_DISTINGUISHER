@@ -185,7 +185,7 @@ function draw() {
           bioGrp.get(i).destroy();
           score = score + 1;
 
-          scores();
+          scoreChecker();
           continue;
         }
 
@@ -193,7 +193,7 @@ function draw() {
           bioGrp.get(i).destroy();
           score = score - 1;
 
-          scores();
+          scoreChecker();
           continue;
         }
         if (bioGrp.get(i).isTouching(nonBiodegradableBin)) {
@@ -212,7 +212,7 @@ function draw() {
           nonBioGrp.get(i).destroy();
           score = score + 1;
 
-          scores();
+          scoreChecker();
           continue;
         }
 
@@ -220,7 +220,7 @@ function draw() {
           nonBioGrp.get(i).destroy();
           score = score - 5;
 
-          scores();
+          scoreChecker();
           continue;
         }
         if (nonBioGrp.get(i).isTouching(biodegradableBin)) {
@@ -361,9 +361,9 @@ function collides(bodyA, bodyB) {
   bodyB.collide(edges[1]);
 
   bodyB.collide(edges[0]);
-
-  bodyA.collide(bodyB);
   bodyB.collide(bodyA);
+  bodyA.collide(bodyB);
+  
 }
 function movement(body, keyA, keyB) {
   //body is the bins,keyA is for left movement and key2 is for right movement over here
@@ -393,12 +393,12 @@ function allImages() {
   pop();
   image(groundImg, ground.x - 500, ground.y - 19, 1000, 190);
 }
-function scores() {
+function scoreChecker() {
   if (score > 10) {
     scoreState = 1;
   }
   if (scoreState === 1) {
-    if (score <= 0) {
+    if (score < 0) {
       bioGrp.destroyEach();
       nonBioGrp.destroyEach();
       gameState = 4;
@@ -416,8 +416,7 @@ function debugg() {
     text("THE CURRENT FRAMECOUNT IS : " + frameCount, 700, 100);
     text("THE CURRENT FRMERATE IS : " + Math.round(frameRate()), 700, 130);
     text("THE GAME MODE IS : " + gameMode, 700, 160);
-    biodegradableBin.debug=true;
-    nonBiodegradableBin.debug=true;
+  
     if (keyWentDown("p")) {
       debugMode = 0;
     }
@@ -427,6 +426,6 @@ function cheat() {
   if (keyWentDown("w")) {
     
     score +=10;
-    scores();
+    scoreChecker();
   }
 }
