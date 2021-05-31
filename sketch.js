@@ -37,6 +37,7 @@ var biodegradableBinImg, nonBiodegradableImg;
 var score, scoreState;
 function preload() {
   glassImg = loadImage("images/glass.png");
+  
   boardImg = loadImage("images/cardBoard.png");
   newsImg = loadImage("images/paperN.png");
   peelImg = loadImage("images/peel.png");
@@ -44,7 +45,7 @@ function preload() {
   soiledImg = loadImage("images/soiledFood.png");
   tissueImg = loadImage("images/tissue.png");
   tyreImg = loadImage("images/tyre.png");
-  wrapperImg = loadImage("/images/Wrapper.png");
+  wrapperImg = loadImage("images/Wrapper.png");
   shoeImg = loadImage("images/wornShoe.png");
 
   biodegradableBinImg = loadImage("images/greenbin.png");
@@ -54,6 +55,7 @@ function preload() {
   bg1 = loadImage("images/bg1.png");
   bg2 = loadImage("images/bio'sEndPage.png");
   bg3 = loadImage("images/nonBgEnd.png");
+  bg4 = loadImage("images/scEnd.png");
   bgInfo = loadImage("images/vScreen.png");
   groundImg = loadImage("images/ground.png");
 }
@@ -173,8 +175,9 @@ function draw() {
 
     allImages();
     // the function for it is to increase scores in the game
+    //to know more scroll to line 426
     cheat();
-
+    
     //biodegradable group's conditions of points scoring and change of state
     if (bioGrp) {
       for (var i = 0; i < bioGrp.length; i++) {
@@ -247,7 +250,7 @@ function draw() {
   }
   //end due to raching score 0 after reaching 10 once
   else if (gameState === 4) {
-    background("red");
+    background(bg4);
     if (keyWentDown("r")) {
       gameMode = "easy";
       gameState = 0;
@@ -413,6 +416,8 @@ function debugg() {
     text("THE CURRENT FRAMECOUNT IS : " + frameCount, 700, 100);
     text("THE CURRENT FRMERATE IS : " + Math.round(frameRate()), 700, 130);
     text("THE GAME MODE IS : " + gameMode, 700, 160);
+    biodegradableBin.debug=true;
+    nonBiodegradableBin.debug=true;
     if (keyWentDown("p")) {
       debugMode = 0;
     }
@@ -422,5 +427,6 @@ function cheat() {
   if (keyWentDown("w")) {
     
     score +=10;
+    scores();
   }
 }

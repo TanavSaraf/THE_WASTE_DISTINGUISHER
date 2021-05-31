@@ -11,8 +11,11 @@ Whereas when you drop a wet waste on the ground you recieve a negative point and
 
 The game is an endless run you would loose when you put the  item in the wrong bin or reach a score of 0 again after reaching score of 10.
 
-to see the debugging mode you may use 'tchr' 
-it would show the collider of all the sprites and would show the frameRate and frameCount to you
-To quit debug state  press 'q'
+to see the debugging mode you may use 'p'
+it would show the frameRate and frameCount and the gameMode to
+To quit debug state  press 'p'
 
+to increase score by 10 you can use 'w' as a cheat
+
+the cheat was added on the basis that every game has some kind of cheats in it and they make the game interesting
 Hope you would enjoy
